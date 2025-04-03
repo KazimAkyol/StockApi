@@ -4,6 +4,10 @@
 ------------------------------------------------------- */
 
 const User = require("../models/user");
+const Token = require("../models/token");
+
+const passwordEncrypt = require("../helpers/passwordEncrypt");
+const jwt = require("jsonwebtoken");
 
 module.exports = {
   login: async (req, res) => {
@@ -77,66 +81,6 @@ module.exports = {
       },
       token: tokenData.token,
       user,
-    });
-  },
-
-  refresh: async (req, res) => {
-    /*
-            #swagger.tags = ["Authentication"]
-            #swagger.summary = "Refresh"
-            #swagger.description = 'Refresh with refreshToken for get accessToken'
-            #swagger.parameters["body"] = {
-                in: "body",
-                required: true,
-                schema: {
-                    "bearer": {
-                    refresh:"...refreshToken..."
-                    },
-                }
-            }
-    */
-
-    const { refresh } = req.body?.bearer;
-
-    if (!refresh) {
-      res.errorStatusCode = 401;
-      throw new Error("Refresh token not found.");
-    }
-
-    const refreshData = jwt.verify(refresh, process.env.REFRESH_KEY);
-
-    if (!refreshData) {
-      res.errorStatusCode = 401;
-      throw new Error("JWT Refresh data is wrong.");
-    }
-
-    const user = await User.findOne({ _id: refreshData._id });
-
-    if (!user && user.password !== refreshData.password) {
-      res.errorStatusCode = 401;
-      throw new Error("Wrong id or password.");
-    }
-
-    if (!user.isActive) {
-      res.errorStatusCode = 401;
-      throw new Error("This account is not active.");
-    }
-
-    const accessData = {
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      isActive: user.isActive,
-      isAdmin: user.isAdmin,
-    };
-
-    res.status(200).send({
-      error: false,
-      bearer: {
-        access: jwt.sign(accessData, process.env.ACCESS_KEY, {
-          expiresIn: "1m",
-        }),
-      },
     });
   },
 

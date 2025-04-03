@@ -38,12 +38,7 @@ module.exports = {
             in:"body",
             require:true,
             schema:{
-            "username": {type:String, example:"test"},
-            "password": "1234",
-            "email": "test@site.com",
-            "isActive": true,
-            "isStaff": false,
-            "isAdmin": false,    
+               $ref: '#/definitions/Firm'    
             },
     */
 
@@ -88,12 +83,7 @@ module.exports = {
             in:"body",
             require:true,
             schema:{
-            "username": "test",
-            "password": "1234",
-            "email": "test@site.com",
-            "isActive": true,
-            "isStaff": false,
-            "isAdmin": false,    
+                $ref: '#/definitions/Firm'
             },
     */
 
