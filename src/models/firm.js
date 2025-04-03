@@ -2,11 +2,10 @@
 /* -------------------------------------------------------
     | FULLSTACK TEAM | NODEJS / EXPRESS |
 ------------------------------------------------------- */
-const { mongoose } = require("../configs/dbConnection");
-const { validate } = require("./user");
+const { mongoose: {model, Schema} } = require("../configs/dbConnection");
 /* ------------------------------------------------------- */
 
-const FirmSchema = new mongoose.Schema(
+const FirmSchema = new Schema(
   {
     name: {
       type: String,
@@ -37,4 +36,4 @@ const FirmSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Firms", FirmSchema);
+module.exports = model("Firms", FirmSchema);
