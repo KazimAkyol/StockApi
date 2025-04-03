@@ -13,38 +13,37 @@ const UserSchema = new mongoose.Schema(
       trim: true,
       required: true,
       unique: true,
+      index: true, //* RAM'de data tutabilmek icin, sorgularda adi cokca gececek olan data'lara index:true verilir.
     },
 
     password: {
       type: String,
       trim: true,
       required: true,
-      set: passwordEncrypt,
+      //   set: passwordEncrypt,
     },
 
     email: {
       type: String,
       trim: true,
       required: true,
-      index: true,
       unique: true,
-      validate: [
-        (email) => /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email),
-        "Please enter a valid email address.",
-      ],
+      index: true,
+      //   validate: [
+      //     (email) => /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email),
+      //     "Please enter a valid email address.",
+      //   ],
     },
 
     firstName: {
       type: String,
       trim: true,
       required: true,
-      required: true,
     },
 
     lastName: {
       type: String,
       trim: true,
-      required: true,
       required: true,
     },
 
