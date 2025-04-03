@@ -55,7 +55,7 @@ const PurchaseSchema = new mongoose.Schema(
       }, //* update'de calisir.
     },
   },
-  { collation: "products", timestamps: true }
+  { collation: "purchases", timestamps: true }
 );
 
-module.exports = mongoose.model("Product", ProductSchema);
+module.exports = mongoose.model("Purchase", PurchaseSchema);
