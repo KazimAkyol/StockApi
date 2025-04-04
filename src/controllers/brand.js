@@ -38,20 +38,9 @@ module.exports = {
             in:"body",
             require:true,
             schema:{
-              $ref: '#/definitions/Brand'    
+                $ref: "#/definitions/Brand"    
             },
     */
-
-    if (
-      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(
-        req?.body?.password
-      )
-    ) {
-      res.errorStatusCode = 401;
-      throw new Error(
-        "Password must be at least 8 characters long and contain at least one special character and  at least one uppercase character"
-      );
-    }
 
     const data = await Brand.create(req.body);
 
@@ -83,18 +72,13 @@ module.exports = {
             in:"body",
             require:true,
             schema:{
-              $ref: '#/definitions/Brand'   
+                $ref: "#/definitions/Brand"   
             },
     */
 
     const data = await Brand.updateOne({ _id: req.params.id }, req.body, {
       runValidators: true,
     });
-
-    if ((!result, modifiedCount)) {
-      res.errorStatusCode = 404;
-      throw new Error("Data is not updated.");
-    }
 
     res.status(202).send({
       error: false,

@@ -21,7 +21,12 @@ module.exports = {
             `
     */
 
-    const data = await res.getModelList(Purchase);
+    const data = await res.getModelList(Purchase, {}, [
+      { path: "userId", select: "username firstName lastName" },
+      { path: "firmId", select: "name" },
+      { path: "brandId", select: "name" },
+      { path: "productId", select: "name" },
+    ]);
 
     res.status(200).send({
       error: false,
@@ -38,7 +43,7 @@ module.exports = {
             in:"body",
             require:true,
             schema:{
-               $ref: '#/definitions/Firm'   
+               $ref: "#/definitions/Purchase"   
             },
     */
 
@@ -65,7 +70,12 @@ module.exports = {
         #swagger.summary = 'Get Single Purchase'
     */
 
-    const data = await Purchase.findOne({ _id: req.params.id });
+    const data = await Purchase.findById(req.params.id).populate([
+      { path: "userId", select: "username firstName lastName" },
+      { path: "firmId", select: "name" },
+      { path: "brandId", select: "name" },
+      { path: "productId", select: "name" },
+    ]);
 
     res.status(200).send({
       error: false,
@@ -81,12 +91,7 @@ module.exports = {
             in:"body",
             require:true,
             schema:{
-            "username": "test",
-            "password": "1234",
-            "email": "test@site.com",
-            "isActive": true,
-            "isStaff": false,
-            "isAdmin": false,    
+                $ref: "#/definitions/Purchase"    
             },
     */
 

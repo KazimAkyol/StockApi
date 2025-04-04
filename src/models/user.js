@@ -68,4 +68,8 @@ const UserSchema = new mongoose.Schema(
   }
 );
 
+//* https://mongoosejs.com/docs/middleware.html
+
+UserSchema.pre(['save', 'updateOne'], function(next) {})
+
 module.exports = mongoose.model("User", UserSchema);
