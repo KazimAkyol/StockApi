@@ -38,27 +38,20 @@ module.exports = {
             in:"body",
             require:true,
             schema:{
-            "username": {type:String, example:"test"},
-            "password": "1234",
-            "email": "test@site.com",
-            "isActive": true,
-            "isStaff": false,
-            "isAdmin": false,    
+               $ref: '#/definitions/Firm'   
             },
     */
 
-    if (
-      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(
-        req?.body?.password
-      )
-    ) {
-      res.errorStatusCode = 401;
-      throw new Error(
-        "Password must be at least 8 characters long and contain at least one special character and  at least one uppercase character"
-      );
-    }
+    //* Set userId from loggedIn user
+    req.body.userId = req.user._id;
 
     const data = await Purchase.create(req.body);
+
+    //* Increase the quantity of product
+    await Product.updateOne(
+      { _id: data.productId },
+      { $inc: { quantity: data.quantity } }
+    );
 
     res.status(201).send({
       error: false,

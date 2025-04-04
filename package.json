@@ -5,7 +5,8 @@
   "description": "Stock Management System",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon",
+    "start": "node index.js",
+    "dev": "node swaggerAutogen && nodemon index.js",
     "debug": "DEBUG=* nodemon"
   },
   "keywords": [],
