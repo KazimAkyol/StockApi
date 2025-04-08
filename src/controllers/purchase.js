@@ -52,7 +52,7 @@ module.exports = {
 
     const data = await Purchase.create(req.body);
 
-    //* Increase the quantity of product
+    //* Increase the quantity of product which is bought
     await Product.updateOne(
       { _id: data.productId },
       { $inc: { quantity: data.quantity } }
@@ -95,14 +95,24 @@ module.exports = {
             },
     */
 
+    //? Update stocks
+    if (req.body.quantity) {
+      // get currentSale
+      const currentPurchase = await Purchase.findById(req.params.id);
+
+      // Calculate the difference
+      const difference = req.body.quantity - currentPurchase.quantity;
+
+      // Decrease quantity from product
+      await Product.updateOne(
+        { _id: currentPurchase.productId },
+        { $inc: { quantity: +difference } }
+      );
+    }
+
     const data = await Purchase.updateOne({ _id: req.params.id }, req.body, {
       runValidators: true,
     });
-
-    if ((!result, modifiedCount)) {
-      res.errorStatusCode = 404;
-      throw new Error("Data is not updated.");
-    }
 
     res.status(202).send({
       error: false,
@@ -118,6 +128,14 @@ module.exports = {
     */
 
     const data = await Purchase.deleteOne({ _id: req.params.id });
+
+    //* Decrease quantity of product back
+    if (data.deletedCount) {
+      await Product.updateOne(
+        { _id: currentPurchase.productId },
+        { $inc: { quantity: -currentPurchase, quantity } }
+      );
+    }
 
     res.status(data.deletedCount ? 204 : 404).send({
       error: !data.deletedCount,

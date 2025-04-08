@@ -14,12 +14,6 @@ const SaleSchema = new mongoose.Schema(
       required: true,
     },
 
-    firmId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Firm",
-      required: true,
-    },
-
     brandId: {
       type: mongoose.Schema.Types.ObjectId,
       red: "Brand",
@@ -55,7 +49,7 @@ const SaleSchema = new mongoose.Schema(
       }, //* update'de calisir.
     },
   },
-  { collation: "sales", timestamps: true }
+  { collection: "sales", timestamps: true }
 );
 
 module.exports = mongoose.model("Sale", SaleSchema);

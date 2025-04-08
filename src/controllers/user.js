@@ -30,42 +30,6 @@ module.exports = {
     });
   },
 
-  create: async (req, res) => {
-    /* 
-        #swagger.tags = ['Users']
-        #swagger.summary = 'Create User'
-        #swagger.parameters['body']={
-            in:"body",
-            require:true,
-            schema:{
-            "username": {type:String, example:"test"},
-            "password": "1234",
-            "email": "test@site.com",
-            "isActive": true,
-            "isStaff": false,
-            "isAdmin": false,    
-            },
-    */
-
-    if (
-      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(
-        req?.body?.password
-      )
-    ) {
-      res.errorStatusCode = 401;
-      throw new Error(
-        "Password must be at least 8 characters long and contain at least one special character and  at least one uppercase character"
-      );
-    }
-
-    const data = await User.create(req.body);
-
-    res.status(201).send({
-      error: false,
-      data,
-    });
-  },
-
   read: async (req, res) => {
     /* 
         #swagger.tags = ['Users']

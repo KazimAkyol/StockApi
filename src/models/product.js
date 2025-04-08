@@ -30,7 +30,7 @@ const ProductSchema = new mongoose.Schema(
       default: 0,
     },
   },
-  { collation: "products", timestamps: true }
+  { collection: "products", timestamps: true }
 );
 
 module.exports = mongoose.model("Product", ProductSchema);

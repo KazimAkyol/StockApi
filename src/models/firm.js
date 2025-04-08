@@ -15,20 +15,19 @@ const FirmSchema = new Schema(
     },
 
     phone: {
-      type: Number,
+      type: String,
       trim: true,
-      required: true,
-      unique: true,
     },
 
     address: {
       type: String,
       trim: true,
-      required: true,
-      validate: [{}],
     },
 
-    image: {},
+    image: {
+        type: String,
+        trim: true,
+    },
   },
   {
     collection: "firms",

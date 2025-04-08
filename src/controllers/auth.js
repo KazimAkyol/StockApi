@@ -1,6 +1,6 @@
 "use strict";
 /* -------------------------------------------------------
-    NODEJS EXPRESS | Stock API
+    | FULLSTACK TEAM | NODEJS / EXPRESS |
 ------------------------------------------------------- */
 
 const User = require("../models/user");
@@ -12,34 +12,31 @@ const jwt = require("jsonwebtoken");
 module.exports = {
   login: async (req, res) => {
     /*
-              #swagger.tags = ["Authentication"]
-              #swagger.summary = "Login"
-              #swagger.description = 'Login with username (or email) and password for get simpleToken and JWT'
-              #swagger.parameters["body"] = {
-                  in: "body",
-                  required: true,
-                  schema: {
-                      "username": "test",
-                      "password": "aA12345.?",
-                  }
-              }
-    */
+            #swagger.tags = ["Authentication"]
+            #swagger.summary = "Login"
+            #swagger.description = 'Login with username (or email) and password for get simpleToken and JWT'
+            #swagger.parameters["body"] = {
+                in: "body",
+                required: true,
+                schema: {
+                    "username": "test",
+                    "password": "aA?123456",
+                }
+            }
+        */
 
     const { username, email, password } = req.body;
 
     if (!((username || email) && password)) {
       res.errorStatusCode = 401;
-      throw new Error("username/email and password are required.");
+      throw new Error("username/email and password are required");
     }
 
-    const user = await User.findOne({
-      $or: [{ username }, { email }],
-      password,
-    }); //* Bu sekilde DB'e bir sorgu atildi.
+    const user = await User.findOne({ $or: [{ username }, { email }] });
 
-    if (!user) {
+    if (user?.password !== passwordEncrypt(password)) {
       res.errorStatusCode = 401;
-      throw new Error("Incorrect email/username and password.");
+      throw new Error("incorrect username/email or password.");
     }
 
     if (!user.isActive) {
@@ -47,9 +44,18 @@ module.exports = {
       throw new Error("This account is not active.");
     }
 
-    //* Yukaridaki her iki if blogunda da ünlem isareti(!) kullanarak user degilse ve user.isActive degilse anlami vererek throw ile bir hata attirilir. Hata yoksa kod oldugu gibi calisir.
+    /* SIMPLE TOKEN */
+    let tokenData = await Token.findOne({ userId: user._id });
 
-    // Access Token
+    if (!tokenData) {
+      tokenData = await Token.create({
+        userId: user._id,
+        token: passwordEncrypt(user._id + Date.now()),
+      });
+    }
+    /* SIMPLE TOKEN */
+
+    /* JWT */
     const accessData = {
       _id: user._id,
       username: user.username,
@@ -59,73 +65,60 @@ module.exports = {
     };
 
     const accessToken = jwt.sign(accessData, process.env.ACCESS_KEY, {
-      expiresIn: "15m",
+      expiresIn: "30m",
     });
+    const refreshToken = jwt.sign(
+      { _id: user._id, password: user.password },
+      process.env.REFRESH_KEY,
+      { expiresIn: "3d" }
+    );
+    /* JWT */
 
-    // Refresh Token:
-    const refreshData = {
-      _id: user._id,
-      password: user.password,
-    };
-
-    const refreshToken = jwt.sign(refreshData, process.env.REFRESH_KEY, {
-      expiresIn: "1d",
-    });
-
-    res.status(200).send({
+    res.send({
       error: false,
-      bearer: {
-        //* jwt ile beraber kullanilir.
-        acces: accessToken,
-        refresh: refreshToken,
-      },
       token: tokenData.token,
+      bearer: { accessToken, refreshToken },
       user,
     });
   },
 
-  refresh: async (req, res) => {
+  register: async (req, res) => {
     /*
             #swagger.tags = ["Authentication"]
-            #swagger.summary = "Refresh"
-            #swagger.description = 'Refresh with refreshToken for get accessToken'
-            #swagger.parameters["body"] = {
-                in: "body",
+            #swagger.summary = "Register User"
+            #swagger.parameters['body'] = {
+                in: 'body',
                 required: true,
                 schema: {
-                    "bearer": {
-                    refresh:"...refreshToken..."
-                    },
+                    "username": "test",
+                    "password": "1234",
+                    "email": "test@site.com",
+                    "firstName": "test",
+                    "lastName": "test",
                 }
             }
-    */
+        */
 
-    const { refresh } = req.body?.bearer;
+    const { username, email } = req.body;
 
-    if (!refresh) {
+    const isUserExist = await User.findOne({ $or: [{ username }, { email }] });
+
+    if (isUserExist) {
       res.errorStatusCode = 401;
-      throw new Error("Refresh token not found.");
+      throw new Error("Already used username or email.");
     }
 
-    const refreshData = jwt.verify(refresh, process.env.REFRESH_KEY);
+    const user = await User.create(req.body);
 
-    if (!refreshData) {
-      res.errorStatusCode = 401;
-      throw new Error("JWT Refresh data is wrong.");
-    }
+    /* SIMPLE TOKEN */
 
-    const user = await User.findOne({ _id: refreshData._id });
+    const tokenData = await Token.create({
+      userId: user._id,
+      token: passwordEncrypt(user._id + Date.now()),
+    });
+    /* SIMPLE TOKEN */
 
-    if (!user && user.password !== refreshData.password) {
-      res.errorStatusCode = 401;
-      throw new Error("Wrong id or password.");
-    }
-
-    if (!user.isActive) {
-      res.errorStatusCode = 401;
-      throw new Error("This account is not active.");
-    }
-
+    /* JWT */
     const accessData = {
       _id: user._id,
       username: user.username,
@@ -134,31 +127,124 @@ module.exports = {
       isAdmin: user.isAdmin,
     };
 
-    res.status(200).send({
-      error: false,
-      bearer: {
-        access: jwt.sign(accessData, process.env.ACCESS_KEY, {
-          expiresIn: "1m",
-        }),
-      },
+    const accessToken = jwt.sign(accessData, process.env.ACCESS_KEY, {
+      expiresIn: "30m",
     });
+    const refreshToken = jwt.sign(
+      { _id: user._id, password: user.password },
+      process.env.REFRESH_KEY,
+      { expiresIn: "3d" }
+    );
+    /* JWT */
+
+    res.send({
+      error: false,
+      token: tokenData.token,
+      bearer: { accessToken, refreshToken },
+      user,
+    });
+  },
+
+  refresh: async (req, res) => {
+    /*
+            #swagger.tags = ['Authentication']
+            #swagger.summary = 'JWT: Refresh'
+            #swagger.description = 'Refresh access-token by refresh-token.'
+            #swagger.parameters['body'] = {
+                in: 'body',
+                required: true,
+                schema: {
+                    bearer: {
+                        refresh: '___refreshToken___'
+                    }
+                }
+            }
+        */
+
+    const refreshToken = req.body?.bearer?.refreshToken;
+
+    if (!refreshToken) {
+      res.errorStatusCode = 401;
+      throw new Error("Please enter token.refresh");
+    }
+
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_KEY,
+      async function (err, userData) {
+        if (err) {
+          res.errorStatusCode = 401;
+          throw err;
+        }
+
+        const { _id, password } = userData;
+
+        if (!(_id && password)) {
+          res.errorStatusCode = 401;
+          throw new Error("Not found id or password in token.");
+        }
+
+        const user = await User.findOne({ _id });
+
+        if (!(user && user.password == password)) {
+          res.errorStatusCode = 401;
+          throw new Error("Wrong id or password.");
+        }
+
+        if (!user.isActive) {
+          res.errorStatusCode = 401;
+          throw new Error("This account is not active.");
+        }
+
+        const accessData = {
+          _id: user._id,
+          username: user.username,
+          email: user.email,
+          isActive: user.isActive,
+          isAdmin: user.isAdmin,
+        };
+        // JWT:
+        const accessToken = jwt.sign(accessData, process.env.ACCESS_KEY, {
+          expiresIn: "30m",
+        });
+
+        res.send({
+          error: false,
+          bearer: { accessToken },
+        });
+      }
+    );
   },
 
   logout: async (req, res) => {
     /*
-          #swagger.tags = ["Authentication"]
-          #swagger.summary = "Logout"
-    */
+            #swagger.tags = ["Authentication"]
+            #swagger.summary = "Token: Logout"
+            #swagger.description = 'Delete token-key.'
+        */
 
-    const result = req.user
-      ? await Token.deleteOne({ userId: req.user._id })
-      : null;
+    const auth = req.headers?.authorization || null; // Token ...tokenKey... // Bearer ...accessToken...
+    const tokenKey = auth ? auth.split(" ") : null; // ['Token', '...tokenKey...'] // ['Bearer', '...accessToken...']
 
-    res.status(200).send({
+    let message = null,
+      result = {};
+
+    if (tokenKey) {
+      if (tokenKey[0] == "Token") {
+        // SimpleToken
+
+        result = await Token.deleteOne({ token: tokenKey[1] });
+        message = "Token deleted. Logout was OK.";
+      } else {
+        // JWT
+        message = "No need any process for logout. You must delete JWT tokens.";
+      }
+    }
+
+    res.send({
       error: false,
-      message: result.deletedCount
-        ? "User logged out and token deleted."
-        : "User Logged out.",
+      message,
+      result,
     });
   },
 };

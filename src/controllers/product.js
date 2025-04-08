@@ -21,7 +21,12 @@ module.exports = {
             `
     */
 
-    const data = await res.getModelList(Product);
+    // const data = await res.getModelList(Product, {}, ["categoryId", brandId]);
+
+    const data = await res.getModelList(Product, {}, [
+      { path: "categoryId", select: "name" },
+      { path: "brandId", select: "name" },
+    ]);
 
     res.status(200).send({
       error: false,
@@ -38,25 +43,9 @@ module.exports = {
             in:"body",
             require:true,
             schema:{
-            "username": {type:String, example:"test"},
-            "password": "1234",
-            "email": "test@site.com",
-            "isActive": true,
-            "isStaff": false,
-            "isAdmin": false,    
+                $ref: "#/definitions/Product"
             },
     */
-
-    if (
-      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(
-        req?.body?.password
-      )
-    ) {
-      res.errorStatusCode = 401;
-      throw new Error(
-        "Password must be at least 8 characters long and contain at least one special character and  at least one uppercase character"
-      );
-    }
 
     const data = await Product.create(req.body);
 
@@ -88,12 +77,7 @@ module.exports = {
             in:"body",
             require:true,
             schema:{
-            "username": "test",
-            "password": "1234",
-            "email": "test@site.com",
-            "isActive": true,
-            "isStaff": false,
-            "isAdmin": false,    
+                $ref: "#/definitions/Product"    
             },
     */
 

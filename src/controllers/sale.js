@@ -3,6 +3,7 @@
     NODEJS EXPRESS | Stock API
 ------------------------------------------------------- */
 
+const Product = require("../models/product");
 const Sale = require("../models/sale");
 
 module.exports = {
@@ -21,7 +22,11 @@ module.exports = {
             `
     */
 
-    const data = await res.getModelList(Sale);
+    const data = await res.getModelList(Sale, {}, [
+      { path: "userId", select: "username firstName lastName" },
+      { path: "brandId", select: "name" },
+      { path: "productId", select: "name" },
+    ]);
 
     res.status(200).send({
       error: false,
@@ -38,24 +43,20 @@ module.exports = {
             in:"body",
             require:true,
             schema:{
-            "username": {type:String, example:"test"},
-            "password": "1234",
-            "email": "test@site.com",
-            "isActive": true,
-            "isStaff": false,
-            "isAdmin": false,    
+                $ref: "#/definitions/Sale" 
             },
     */
 
-    if (
-      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(
-        req?.body?.password
-      )
-    ) {
-      res.errorStatusCode = 401;
-      throw new Error(
-        "Password must be at least 8 characters long and contain at least one special character and  at least one uppercase character"
-      );
+    //* Set userId from loggedIn user
+    req.body.userId = req.user._id;
+
+    const currentProduct = await Product.findById(req.body.productId);
+
+    if (currentProduct.quantity < req.body.quantity) {
+      res.errorStatusCode = 422;
+      throw new Error("There is not enough product-quantity for this sale", {
+        cause: `Quantity in our stock: ${currentProduct.quantity}`,
+      });
     }
 
     const data = await Sale.create(req.body);
@@ -88,12 +89,7 @@ module.exports = {
             in:"body",
             require:true,
             schema:{
-            "username": "test",
-            "password": "1234",
-            "email": "test@site.com",
-            "isActive": true,
-            "isStaff": false,
-            "isAdmin": false,    
+                $ref: "#/definitions/Sale"    
             },
     */
 
@@ -101,9 +97,19 @@ module.exports = {
       runValidators: true,
     });
 
-    if ((!result, modifiedCount)) {
-      res.errorStatusCode = 404;
-      throw new Error("Data is not updated.");
+    //? Update stocks
+    if (req.body.quantity) {
+      // get currentSale
+      const currentSale = await Sale.findById(req.params.id);
+
+      // Calculate the difference
+      const difference = req.body.quantity - currentSale.quantity;
+
+      // Decrease quanitity from product
+      await Product.updateOne(
+        { _id: currentSale.productId },
+        { $inc: { quantity: -difference } }
+      );
     }
 
     res.status(202).send({

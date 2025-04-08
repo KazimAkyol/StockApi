@@ -42,17 +42,6 @@ module.exports = {
             },
     */
 
-    if (
-      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(
-        req?.body?.password
-      )
-    ) {
-      res.errorStatusCode = 401;
-      throw new Error(
-        "Password must be at least 8 characters long and contain at least one special character and  at least one uppercase character"
-      );
-    }
-
     const data = await Firm.create(req.body);
 
     res.status(201).send({
@@ -67,7 +56,7 @@ module.exports = {
         #swagger.summary = 'Get Single Firm'
     */
 
-    const data = await Firm.findOne({ _id: req.params.id });
+    const data = await Firm.findById({ _id: req.params.id });
 
     res.status(200).send({
       error: false,
@@ -90,11 +79,6 @@ module.exports = {
     const data = await Firm.updateOne({ _id: req.params.id }, req.body, {
       runValidators: true,
     });
-
-    if ((!result, modifiedCount)) {
-      res.errorStatusCode = 404;
-      throw new Error("Data is not updated.");
-    }
 
     res.status(202).send({
       error: false,
