@@ -2,7 +2,9 @@
 /* -------------------------------------------------------
     | FULLSTACK TEAM | NODEJS / EXPRESS |
 ------------------------------------------------------- */
-const { mongoose: {model, Schema} } = require("../configs/dbConnection");
+const {
+  mongoose: { model, Schema },
+} = require("../configs/dbConnection");
 /* ------------------------------------------------------- */
 
 const FirmSchema = new Schema(
@@ -25,8 +27,8 @@ const FirmSchema = new Schema(
     },
 
     image: {
-        type: String,
-        trim: true,
+      type: String,
+      trim: true,
     },
   },
   {
