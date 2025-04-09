@@ -89,7 +89,7 @@ module.exports = {
       error: !data.deletedCount,
       message: data.deletedCount
         ? "Data deleted."
-        : " Data is not found or already deleted",
+        : " Data is not found or already deleted.",
       data,
     });
   },
