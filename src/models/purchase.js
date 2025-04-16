@@ -1,7 +1,7 @@
 "use strict";
 const { mongo } = require("mongoose");
 /* -------------------------------------------------------
-    | FULLSTACK TEAM | NODEJS / EXPRESS |
+    NODEJS EXPRESS | Stock API
 ------------------------------------------------------- */
 const { mongoose } = require("../configs/dbConnection");
 /* ------------------------------------------------------- */

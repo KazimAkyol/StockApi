@@ -1,6 +1,6 @@
 "use strict";
 /* -------------------------------------------------------
-    | FULLSTACK TEAM | NODEJS / EXPRESS |
+    NODEJS EXPRESS | Stock API
 ------------------------------------------------------- */
 const { mongoose } = require("../configs/dbConnection");
 const passwordEncrypt = require("../helpers/passwordEncrypt");

@@ -1,6 +1,6 @@
 "use strict";
 /* -------------------------------------------------------
-    | FULLSTACK TEAM | NODEJS / EXPRESS |
+    NODEJS EXPRESS | Stock API
 ------------------------------------------------------- */
 
 // $ cp .env-sample .env

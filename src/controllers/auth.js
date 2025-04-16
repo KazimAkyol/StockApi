@@ -1,6 +1,6 @@
 "use strict";
 /* -------------------------------------------------------
-    | FULLSTACK TEAM | NODEJS / EXPRESS |
+    NODEJS EXPRESS | Stock API
 ------------------------------------------------------- */
 
 const User = require("../models/user");

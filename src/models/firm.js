@@ -1,6 +1,6 @@
 "use strict";
 /* -------------------------------------------------------
-    | FULLSTACK TEAM | NODEJS / EXPRESS |
+    NODEJS EXPRESS | Stock API
 ------------------------------------------------------- */
 const {
   mongoose: { model, Schema },
@@ -37,4 +37,4 @@ const FirmSchema = new Schema(
   }
 );
 
-module.exports = model("Firms", FirmSchema);
+module.exports = model("Firm", FirmSchema);
