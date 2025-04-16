@@ -8,6 +8,7 @@
 // $ npm i express dotenv mongoose express-async-errors
 // $ npm i morgan swagger-autogen swagger-ui-express redoc-express
 // $ mkdir logs
+// $ nodemon
 
 const express = require("express");
 const app = express();

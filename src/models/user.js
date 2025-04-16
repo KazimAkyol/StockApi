@@ -71,9 +71,8 @@ const UserSchema = new mongoose.Schema(
 //* https://mongoosejs.com/docs/middleware.html
 
 UserSchema.pre(["save", "updateOne"], function (next) {
-  console.log("pre-save worked.");
-
-  console.log(this);
+  //   console.log("pre-save worked.");
+  //   console.log(this);
 
   const data = this._update ?? this;
 
@@ -86,6 +85,7 @@ UserSchema.pre(["save", "updateOne"], function (next) {
     next(new Error("Email is not validated."));
   }
 
+  //* Password Control:
   const isPasswordValidated = data.password
     ? /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(data.password)
     : true;
@@ -95,11 +95,11 @@ UserSchema.pre(["save", "updateOne"], function (next) {
   }
 
   if (this._update) {
-    // Update
+    //* Update
 
     this._update.password = passwordEncrypt(data.password);
   } else {
-    // Save
+    //* Save
 
     this.password = passwordEncrypt(data.password);
   }

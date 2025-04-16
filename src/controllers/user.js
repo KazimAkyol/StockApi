@@ -30,6 +30,8 @@ module.exports = {
     });
   },
 
+  //* auth.controller.js'de register islemi yapilacagindan dolayi create islemi silindi!!!
+
   read: async (req, res) => {
     /* 
         #swagger.tags = ['Users']
