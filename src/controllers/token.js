@@ -80,8 +80,7 @@ module.exports = {
 
   deletee: async (req, res) => {
     /* 
-        #swagger.tags = ['Tokens']
-        #swagger.summary = 'Delete Token'
+      #swagger.ignore = true
     */
 
     const data = await Token.deleteOne({ _id: req.params.id });

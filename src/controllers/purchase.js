@@ -70,7 +70,7 @@ module.exports = {
         #swagger.summary = 'Get Single Purchase'
     */
 
-    const data = await Purchase.findById(req.params.id).populate([
+    const data = await res.getModelList(Purchase, {}, [
       { path: "userId", select: "username firstName lastName" },
       { path: "firmId", select: "name" },
       { path: "brandId", select: "name" },

@@ -1,6 +1,6 @@
 "use strict";
 /* -------------------------------------------------------
-    NODEJS EXPRESS | Stock API
+| FULLSTACK TEAM | NODEJS / EXPRESS |
 ------------------------------------------------------- */
 
 const Product = require("../models/product");
@@ -8,19 +8,19 @@ const Sale = require("../models/sale");
 
 module.exports = {
   list: async (req, res) => {
-    /* 
-            #swagger.tags = ['Sales']
-            #swagger.summary = 'List Sale'
-            #swagger.desription = `
-                You can send query with endpoint for filter[], search[], sort[], page and limit.
-                <ul> Examples usage:
+    /*
+            #swagger.tags = ["Sales"]
+            #swagger.summary = "List Sales"
+            #swagger.description = `
+                You can use <u>filter[] & search[] & sort[] & page & limit</u> queries with endpoint.
+                <ul> Examples:
                     <li>URL/?<b>filter[field1]=value1&filter[field2]=value2</b></li>
                     <li>URL/?<b>search[field1]=value1&search[field2]=value2</b></li>
-                    <li>URL/?<b>sort[field1]=1&sort[field2]=-1</b></li>
-                    <li>URL/?<b>page=2&limit=1</b></li>
+                    <li>URL/?<b>sort[field1]=asc&sort[field2]=desc</b></li>
+                    <li>URL/?<b>limit=10&page=1</b></li>
                 </ul>
             `
-    */
+        */
 
     const data = await res.getModelList(Sale, {}, [
       { path: "userId", select: "username firstName lastName" },
@@ -36,16 +36,17 @@ module.exports = {
   },
 
   create: async (req, res) => {
-    /* 
-        #swagger.tags = ['Sales']
-        #swagger.summary = 'Create Sale'
-        #swagger.parameters['body']={
-            in:"body",
-            require:true,
-            schema:{
-                $ref: "#/definitions/Sale" 
-            },
-    */
+    /*
+            #swagger.tags = ["Sales"]
+            #swagger.summary = "Create Sale"
+            #swagger.parameters['body'] = {
+                in: 'body',
+                required: true,
+                schema: {
+                    $ref: "#/definitions/Sale"
+                }
+            }
+        */
 
     //* Set userId from loggedIn user
     req.body.userId = req.user._id;
@@ -61,19 +62,29 @@ module.exports = {
 
     const data = await Sale.create(req.body);
 
-    res.status(201).send({
+    //* Decrease quantity of product which is sold
+    await Product.updateOne(
+      { _id: data.productId },
+      { $inc: { quantity: -data.quantity } }
+    );
+
+    res.status(200).send({
       error: false,
       data,
     });
   },
 
   read: async (req, res) => {
-    /* 
-        #swagger.tags = ['Sales']
-        #swagger.summary = 'Get Single Sale'
-    */
+    /*
+            #swagger.tags = ["Sales"]
+            #swagger.summary = "Get Single Sale"
+        */
 
-    const data = await Sale.findOne({ _id: req.params.id });
+    const data = await Sale.findById(req.params.id).populate([
+      { path: "userId", select: "username firstName lastName" },
+      { path: "brandId", select: "name" },
+      { path: "productId", select: "name" },
+    ]);
 
     res.status(200).send({
       error: false,
@@ -82,22 +93,19 @@ module.exports = {
   },
 
   update: async (req, res) => {
-    /* 
-        #swagger.tags = ['Sales']
-        #swagger.summary = 'Update Sale'
-        #swagger.parameters['body']={
-            in:"body",
-            require:true,
-            schema:{
-                $ref: "#/definitions/Sale"    
-            },
-    */
+    /*
+            #swagger.tags = ["Sales"]
+            #swagger.summary = "Update Sale"
+            #swagger.parameters['body'] = {
+                in: 'body',
+                required: true,
+                schema: {
+                    $ref: "#/definitions/Sale"
+                }
+            }
+        */
 
-    const data = await Sale.updateOne({ _id: req.params.id }, req.body, {
-      runValidators: true,
-    });
-
-    //? Update stocks
+    //* Update stocks
     if (req.body.quantity) {
       // get currentSale
       const currentSale = await Sale.findById(req.params.id);
@@ -112,7 +120,11 @@ module.exports = {
       );
     }
 
-    res.status(202).send({
+    const data = await Sale.updateOne({ _id: req.params.id }, req.body, {
+      runValidators: true,
+    });
+
+    res.status(200).send({
       error: false,
       data,
       new: await Sale.findById(req.params.id),
@@ -120,18 +132,28 @@ module.exports = {
   },
 
   deletee: async (req, res) => {
-    /* 
-        #swagger.tags = ['Sales']
-        #swagger.summary = 'Delete Sale'
-    */
+    /*
+            #swagger.tags = ["Sales"]
+            #swagger.summary = "Delete Sale"
+        */
+
+    const currentSale = await Sale.findById(req.params.id);
 
     const data = await Sale.deleteOne({ _id: req.params.id });
+
+    //* Increase quantity of product back
+    if (data.deletedCount) {
+      await Product.updateOne(
+        { _id: currentSale.productId },
+        { $inc: { quantity: currentSale.quantity } }
+      );
+    }
 
     res.status(data.deletedCount ? 204 : 404).send({
       error: !data.deletedCount,
       message: data.deletedCount
         ? "Data deleted."
-        : " Data is not found or already deleted",
+        : "Data is not found or already deleted.",
       data,
     });
   },

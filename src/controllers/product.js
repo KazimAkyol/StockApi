@@ -56,12 +56,15 @@ module.exports = {
   },
 
   read: async (req, res) => {
-    /* 
-        #swagger.tags = ['Products']
-        #swagger.summary = 'Get Single Product'
-    */
+    /*
+            #swagger.tags = ["Products"]
+            #swagger.summary = "Get Single Product"
+        */
 
-    const data = await Product.findOne({ _id: req.params.id });
+    const data = await Product.findById(req.params.id).populate([
+      { path: "categoryId", select: "name" },
+      { path: "brandId", select: "name" },
+    ]);
 
     res.status(200).send({
       error: false,
