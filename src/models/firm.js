@@ -7,7 +7,7 @@ const {
 } = require("../configs/dbConnection");
 /* ------------------------------------------------------- */
 
-const FirmSchema = new Schema(
+const FirmSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -37,4 +37,4 @@ const FirmSchema = new Schema(
   }
 );
 
-module.exports = model("Firm", FirmSchema);
+module.exports = mongoose.model("Firm", FirmSchema);

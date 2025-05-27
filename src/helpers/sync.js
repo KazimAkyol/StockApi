@@ -319,7 +319,7 @@ module.exports = async function () {
         "productId": "65343222b67e9681f937f427",
         "quantity": 10,
         "price": 3500
-     })
+    })
 
     /* Finished */
     console.log('* Synchronized.')

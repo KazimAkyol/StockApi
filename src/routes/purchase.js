@@ -6,11 +6,11 @@ const router = require("express").Router();
 /* ------------------------------------------------------- */
 
 const {
-  list,
-  create,
-  read,
-  update,
-  deletee,
+    list,
+    create,
+    read,
+    update,
+    deletee,
 } = require("../controllers/purchase");
 const { isLogin, isAdmin, isStaff } = require("../middlewares/permissions");
 
@@ -19,11 +19,11 @@ const { isLogin, isAdmin, isStaff } = require("../middlewares/permissions");
 router.route("/").get(isLogin, list).post(isStaff, create);
 
 router
-  .route("/:id")
-  .get(isLogin, read)
-  .put(isAdmin, update)
-  .patch(isAdmin, update)
-  .delete(isAdmin, deletee);
+    .route("/:id")
+    .get(isLogin, read)
+    .put(isAdmin, update)
+    .patch(isAdmin, update)
+    .delete(isAdmin, deletee);
 
 /* ------------------------------------------------------- */
 module.exports = router;
